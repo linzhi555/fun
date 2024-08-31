@@ -17,5 +17,5 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pb0_clicked(){
     do_blah();
-    qDebug() << "buttong Clicked";
+    qDebug() << "buttong Clicked!";
 }
