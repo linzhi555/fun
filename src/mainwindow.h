@@ -1,23 +1,39 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QAction>
+#include <QFile>
+#include <QFileDialog>
+#include <QLabel>
 #include <QMainWindow>
+#include <QMenuBar>
+#include <QStatusBar>
+#include <QTextEdit>
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+  Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+  MainWindow(QWidget *parent = nullptr);
+  ~MainWindow();
+
+protected:
+  void keyPressEvent(QKeyEvent *event) override;
+
 private slots:
-    void on_pb0_clicked();
+  void openFile();
+  void saveFile();
+  void updateStatusBar();
 
 private:
-    Ui::MainWindow *ui;
+  QString currentFile;
+  QTextEdit *textEdit;
+  QLabel *filePathLabel;
+  QLabel *fileSizeLabel;
+  QLabel *lineCountLabel;
+
+  void updateFileInfo(const QString &filePath);
+  void _openFile(const QString &filePath);
 };
+
 #endif // MAINWINDOW_H
