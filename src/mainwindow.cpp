@@ -6,7 +6,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), textEdit(new QTextEdit(this)),
       filePathLabel(new QLabel(this)), fileSizeLabel(new QLabel(this)),
-      lineCountLabel(new QLabel(this)), currentFile("") {
+      lineCountLabel(new QLabel(this)), fileSaveState(new QLabel(this)),
+      currentFile("") {
 
   setCentralWidget(textEdit);
 
@@ -14,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
   statusBar()->addWidget(filePathLabel);
   statusBar()->addWidget(fileSizeLabel);
   statusBar()->addWidget(lineCountLabel);
+  statusBar()->addWidget(fileSaveState);
 
   QMenu *fileMenu = menuBar()->addMenu("文件");
 
@@ -77,6 +79,7 @@ void MainWindow::saveFile() {
       file.write(textEdit->toPlainText().toUtf8());
       file.close();
       updateFileInfo(currentFile);
+      fileSaveState->setText("written");
     }
   }
 }
@@ -88,7 +91,7 @@ void MainWindow::updateStatusBar() {
 }
 
 void MainWindow::updateFileInfo(const QString &filePath) {
-  filePathLabel->setText(QString("路径: %1").arg(filePath));
+  filePathLabel->setText(QString("%1").arg(filePath));
 
   QFile file(filePath);
   if (file.exists()) {

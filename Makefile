@@ -7,3 +7,6 @@ run:all
 	./build/fun
 test:
 	echo "hello"
+
+install:all
+	mv ./build/fun   ~/.local/bin/

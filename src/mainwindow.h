@@ -31,6 +31,7 @@ private:
   QLabel *filePathLabel;
   QLabel *fileSizeLabel;
   QLabel *lineCountLabel;
+  QLabel *fileSaveState;
 
   void updateFileInfo(const QString &filePath);
   void _openFile(const QString &filePath);

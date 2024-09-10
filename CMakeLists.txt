@@ -24,13 +24,9 @@ set( PROJECT_SOURCES
         ./src/config.cpp
         ./src/mainwindow.h
 )
-
 set(CMAKE_BUILD_TYPE Debug)
-
 message(${PROJECT_SOURCES})
 add_executable(fun ${PROJECT_SOURCES})
-
 target_link_libraries(fun PRIVATE Qt5::Widgets blah)
 target_include_directories(fun PRIVATE blah)
-
 add_subdirectory(test)
