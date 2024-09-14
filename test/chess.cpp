@@ -1,3 +1,4 @@
+#include "chess.h"
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -5,62 +6,6 @@
 #include <string>
 
 namespace chess {
-
-enum class Response : char {
-    Success,
-    ErrParseCmd,
-    ErrWrongPos,
-    ErrAlreadyFinish,
-    ErrNotYourTurn,
-    ErrPieceRule,
-    ErrSucide,
-};
-
-enum class Team : char {
-    None,
-    White,
-    Black,
-    All,
-
-};
-
-Team TeamReverse(Team t) {
-    switch (t) {
-    case Team::White:
-        return Team::Black;
-    case Team::Black:
-        return Team::White;
-    default:
-        return Team::None;
-    }
-}
-
-enum class PieceRole : char {
-    None,
-    King,
-    Queen,
-    Rook,
-    Bishop,
-    Knight,
-    Pawn,
-};
-
-struct Piece {
-    Team team;
-    int moveCount;
-    PieceRole role;
-};
-
-struct BoardElem {
-    bool isEmpty;
-    Piece piece;
-};
-
-void copyBoard(const BoardElem from[64], BoardElem dst[64]) {
-    for (int i = 0; i < 64; i++) {
-        dst[i] = from[i];
-    }
-}
 
 enum class ChangeType : char {
     NoChange,
@@ -74,6 +19,42 @@ struct Change {
     int x;
     int y;
 };
+
+enum class CmdType : char {
+    None,
+    Move,
+    Surrender,
+    Promotion,
+};
+
+struct Cmd {
+    CmdType type;
+    int x_old;
+    int y_old;
+
+    int x_new;
+    int y_new;
+
+    static int Parse(const std::string& s, Cmd& cmd);
+    static Cmd fromIndex(int from, int to);
+};
+
+Team TeamReverse(Team t) {
+    switch (t) {
+    case Team::White:
+        return Team::Black;
+    case Team::Black:
+        return Team::White;
+    default:
+        return Team::None;
+    }
+}
+
+void copyBoard(const BoardElem from[64], BoardElem dst[64]) {
+    for (int i = 0; i < 64; i++) {
+        dst[i] = from[i];
+    }
+}
 
 int vec2toIndex(int x, int y) {
     return x + y * 8;
@@ -98,25 +79,6 @@ int applyChange(BoardElem board[64], const Change(res)[5]) {
 
     return 0;
 }
-
-enum class CmdType : char {
-    None,
-    Move,
-    Surrender,
-    Promotion,
-};
-
-struct Cmd {
-    CmdType type;
-    int x_old;
-    int y_old;
-
-    int x_new;
-    int y_new;
-
-    static int Parse(const std::string& s, Cmd& cmd);
-    static Cmd fromIndex(int from, int to);
-};
 
 int Cmd::Parse(const std::string& s, Cmd& cmd) {
     char args[10][11] = { { 0 } };
@@ -200,7 +162,7 @@ class PawnRule : public AbstractPieceRule {
                 return false;
             }
         }
-
+        return false;
     }
 };
 
@@ -374,30 +336,6 @@ bool drawState(BoardElem board[64], Team t) {
     return true;
 }
 
-class GameState {
-    int round;
-    bool isFinished;
-    Team winner;
-    Team turn;
-    BoardElem board[64];
-
-   public:
-    GameState();
-    GameState clone();
-    void debug();
-    // std::string Save();
-    // GameState Load(const std::string& data);
-    Response execute(const std::string& cmd);
-
-   private:
-    BoardElem* getPos(int x, int y);
-    PieceRole getRole(int x, int y);
-
-    bool possibleMove(int x, int y);
-    bool finishState();
-    int changeTurn();
-};
-
 GameState::GameState() : round(1), isFinished(false), winner(Team::None), turn(Team::White) {
 }
 
@@ -478,12 +416,3 @@ Response GameState::execute(const std::string& cmdstr) {
 }
 
 }  // namespace chess
-
-int main() {
-    chess::Cmd cmd;
-    int err = chess::Cmd::Parse("move 1 2 3 4", cmd);
-    printf("res %d \n", err);
-    printf("%d %d %d %d \n", cmd.x_old, cmd.y_old, cmd.x_new, cmd.y_new);
-
-    printf("it is a chess game \n");
-}
