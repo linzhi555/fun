@@ -30,8 +30,12 @@ void init(QApplication *app) {
     parser.process(*app);
 
     // 处理选项
-    if (parser.isSet(optionA)) { qDebug() << "选项 A 被设置"; }
-    if (parser.isSet(optionB)) { qDebug() << "选项 B 被设置"; }
+    if (parser.isSet(optionA)) {
+        qDebug() << "选项 A 被设置";
+    }
+    if (parser.isSet(optionB)) {
+        qDebug() << "选项 B 被设置";
+    }
 
     // 处理位置参数
     const QStringList args = parser.positionalArguments();

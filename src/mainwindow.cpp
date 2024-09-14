@@ -1,11 +1,13 @@
 #include "mainwindow.h"
-#include "config.h"
 
 #include <QKeyEvent>
 
+#include "config.h"
+#include "editorwidget.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
-      textEdit(new QTextEdit(this)),
+      textEdit(new EditorWidgt(this)),
       filePathLabel(new QLabel(this)),
       fileSizeLabel(new QLabel(this)),
       lineCountLabel(new QLabel(this)),
@@ -43,10 +45,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 连接文本更改信号
     connect(textEdit, &QTextEdit::textChanged, this, &MainWindow::updateStatusBar);
-    _openFile(fun::config::inputFiles.first());
+
+    if (fun::config::inputFiles.length() > 0) {
+        _openFile(fun::config::inputFiles.first());
+    }
 }
 
-MainWindow::~MainWindow() {}
+MainWindow::~MainWindow() {
+}
 
 void MainWindow::_openFile(const QString &filePath) {
     QFile file(filePath);
@@ -60,12 +66,16 @@ void MainWindow::_openFile(const QString &filePath) {
 
 void MainWindow::openFile() {
     QString filePath = QFileDialog::getOpenFileName(this, "打开文件");
-    if (!filePath.isEmpty()) { _openFile(filePath); }
+    if (!filePath.isEmpty()) {
+        _openFile(filePath);
+    }
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     // 检测 Ctrl + S
-    if (event->key() == Qt::Key_S && event->modifiers() & Qt::ControlModifier) { saveFile(); }
+    if (event->key() == Qt::Key_S && event->modifiers() & Qt::ControlModifier) {
+        saveFile();
+    }
     QMainWindow::keyPressEvent(event);  // 调用基类处理其他按键
 }
 
@@ -78,6 +88,8 @@ void MainWindow::saveFile() {
             updateFileInfo(currentFile);
             fileSaveState->setText("written");
         }
+    } else {
+        this->fileSaveState->setText("no filename to write");
     }
 }
 

@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QAction>
 #include <QFile>
@@ -9,6 +8,8 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QTextEdit>
+
+#include "editorwidget.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -27,7 +28,7 @@ class MainWindow : public QMainWindow {
 
    private:
     QString currentFile;
-    QTextEdit *textEdit;
+    EditorWidgt *textEdit;
     QLabel *filePathLabel;
     QLabel *fileSizeLabel;
     QLabel *lineCountLabel;
@@ -36,5 +37,3 @@ class MainWindow : public QMainWindow {
     void updateFileInfo(const QString &filePath);
     void _openFile(const QString &filePath);
 };
-
-#endif  // MAINWINDOW_H

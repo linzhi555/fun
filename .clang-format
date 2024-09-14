@@ -2,9 +2,11 @@ BasedOnStyle: Google
 IndentWidth: 4
 UseTab: Never
 ColumnLimit: 120
-AllowShortBlocksOnASingleLine: true
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: Inline
+
+IndentCaseLabels: False
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
 BreakBeforeBraces: Attach
 SpaceBeforeParens: ControlStatements
 SpacesInParentheses: false

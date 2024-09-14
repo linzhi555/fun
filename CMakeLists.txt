@@ -11,6 +11,11 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
 find_package(QT NAMES Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
@@ -22,6 +27,7 @@ set( PROJECT_SOURCES
         ./src/main.cpp
         ./src/mainwindow.cpp
         ./src/config.cpp
+        ./src/editorwidget.cpp
         ./src/mainwindow.h
 )
 set(CMAKE_BUILD_TYPE Debug)
