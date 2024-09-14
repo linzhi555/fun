@@ -4,6 +4,8 @@
 
 TEST(ChessTest,All){
     printf("hello wrold\n");
-    EXPECT_EQ(1, 3);
+
+    chess::GameState state;
+    state.debug();
 
 }

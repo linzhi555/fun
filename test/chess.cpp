@@ -139,24 +139,68 @@ Cmd Cmd::fromIndex(int from, int to) {
 
 class AbstractPieceRule {
    public:
-    virtual bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change* changes) const = 0;
+    virtual bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change changes[5]) const = 0;
 };
 
 class PawnRule : public AbstractPieceRule {
    public:
-    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change* changes) const override {
+    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change changes[5]) const override {
+        int oldIndex = vec2toIndex(cmd.x_old, cmd.y_old);
+        int newIndex = vec2toIndex(cmd.x_new, cmd.y_new);
+
+        if (board[oldIndex].isEmpty) {
+            return false;
+        }
+
+        int rightDirect = board[oldIndex].piece.team == Team::White ? 1 : -1;
+
+        if ((cmd.y_new - cmd.y_old) / abs(cmd.y_new - cmd.y_old) != rightDirect) {
+            return false;
+        }
+
         if (abs(cmd.y_new - cmd.y_old) == 1 && (cmd.x_new - cmd.x_old) == 0) {
             if (!board[vec2toIndex(cmd.x_new, cmd.y_new)].isEmpty) {
                 return false;
             }
+            changes[0].type = ChangeType::Delete;
+            changes[0].x = cmd.x_old;
+            changes[0].y = cmd.y_old;
+            changes[0].role = board[oldIndex].piece;
+
+            changes[1].type = ChangeType::Add;
+            changes[1].x = cmd.x_new;
+            changes[1].y = cmd.y_new;
+            changes[1].role = board[oldIndex].piece;
+            changes[1].role.moveCount += 1;
+
+            changes[2].type = ChangeType::NoChange;
         }
 
         if (abs(cmd.y_new - cmd.y_old) == 1 && abs(cmd.x_new - cmd.x_old) == 1) {
             if (board[vec2toIndex(cmd.x_new, cmd.y_new)].isEmpty) {
                 return false;
             }
+
+            changes[0].type = ChangeType::Delete;
+            changes[0].x = cmd.x_old;
+            changes[0].y = cmd.y_old;
+            changes[0].role = board[oldIndex].piece;
+
+            changes[1].type = ChangeType::Delete;
+            changes[1].x = cmd.x_new;
+            changes[1].y = cmd.y_new;
+            changes[1].role = board[newIndex].piece;
+
+            changes[2].type = ChangeType::Add;
+            changes[2].x = cmd.x_new;
+            changes[2].y = cmd.y_new;
+            changes[2].role = board[oldIndex].piece;
+            changes[2].role.moveCount += 1;
+
+            changes[3].type = ChangeType::NoChange;
         }
 
+        // TODO: for enpasst
         if (abs(cmd.y_new - cmd.y_old) == 2 && abs(cmd.x_new - cmd.x_old) == 1) {
             if (board[vec2toIndex(cmd.x_new, cmd.y_new)].isEmpty) {
                 return false;
@@ -168,35 +212,228 @@ class PawnRule : public AbstractPieceRule {
 
 class KingRule : public AbstractPieceRule {
    public:
-    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change* changes) const override {
+    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change changes[5]) const override {
+        int oldIndex = vec2toIndex(cmd.x_old, cmd.y_old);
+
+        int newIndex = vec2toIndex(cmd.x_new, cmd.y_new);
+
+        if (board[oldIndex].isEmpty) {
+            return false;
+        }
+
+        if (abs(cmd.x_old - cmd.x_new) * abs(cmd.y_old - cmd.y_new) != 1) {
+            return false;
+        }
+
+        if (!board[newIndex].isEmpty && board[newIndex].piece.team == board[oldIndex].piece.team) {
+            return false;
+        }
+
+        changes[0].type = ChangeType::Delete;
+        changes[0].x = cmd.x_old;
+        changes[0].y = cmd.y_old;
+        changes[0].role = board[oldIndex].piece;
+
+        if (board[newIndex].isEmpty) {
+            changes[1].type = ChangeType::Add;
+            changes[1].x = cmd.x_new;
+            changes[1].y = cmd.y_new;
+            changes[1].role = board[oldIndex].piece;
+            changes[1].role.moveCount += 1;
+
+            changes[2].type = ChangeType::NoChange;
+        } else {
+            changes[1].type = ChangeType::Delete;
+            changes[1].x = cmd.x_new;
+            changes[1].y = cmd.y_new;
+            changes[1].role = board[newIndex].piece;
+
+            changes[2].type = ChangeType::Add;
+            changes[2].x = cmd.x_new;
+            changes[2].y = cmd.y_new;
+            changes[2].role = board[oldIndex].piece;
+            changes[2].role.moveCount += 1;
+
+            changes[3].type = ChangeType::NoChange;
+        }
+
         return true;
-    }
+    };
 };
 
 class KnightRule : public AbstractPieceRule {
    public:
-    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change* changes) const override {
+    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change changes[5]) const override {
+        int oldIndex = vec2toIndex(cmd.x_old, cmd.y_old);
+        int newIndex = vec2toIndex(cmd.x_new, cmd.y_new);
+        if (board[oldIndex].isEmpty) {
+            return false;
+        }
+
+        if (abs(cmd.x_old - cmd.x_new) * abs(cmd.y_old - cmd.y_new) != 2) {
+            return false;
+        }
+        if (!board[newIndex].isEmpty && board[newIndex].piece.team == board[oldIndex].piece.team) {
+            return false;
+        }
+
+        changes[0].type = ChangeType::Delete;
+        changes[0].x = cmd.x_old;
+        changes[0].y = cmd.y_old;
+        changes[0].role = board[oldIndex].piece;
+
+        if (board[newIndex].isEmpty) {
+            changes[1].type = ChangeType::Add;
+            changes[1].x = cmd.x_new;
+            changes[1].y = cmd.y_new;
+            changes[1].role = board[oldIndex].piece;
+            changes[1].role.moveCount += 1;
+
+            changes[2].type = ChangeType::NoChange;
+        } else {
+            changes[1].type = ChangeType::Delete;
+            changes[1].x = cmd.x_new;
+            changes[1].y = cmd.y_new;
+            changes[1].role = board[newIndex].piece;
+
+            changes[2].type = ChangeType::Add;
+            changes[2].x = cmd.x_new;
+            changes[2].y = cmd.y_new;
+            changes[2].role = board[oldIndex].piece;
+            changes[2].role.moveCount += 1;
+
+            changes[3].type = ChangeType::NoChange;
+        }
+
         return true;
     }
 };
 
 class BishopRule : public AbstractPieceRule {
    public:
-    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change* changes) const override {
+    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change changes[5]) const override {
+        int oldIndex = vec2toIndex(cmd.x_old, cmd.y_old);
+        int newIndex = vec2toIndex(cmd.x_new, cmd.y_new);
+        if (board[oldIndex].isEmpty) {
+            return false;
+        }
+
+        if (abs(cmd.x_old - cmd.x_new) != abs(cmd.y_old - cmd.y_new) || cmd.x_old == cmd.x_new) {
+            return false;
+        }
+
+        for (int i = 0; i < 64; i++) {
+            if ((i % 8 > cmd.x_new && i % 8 < cmd.x_old) || (i % 8 < cmd.x_new && i % 8 > cmd.x_old)) {
+                if ((i / 8 > cmd.y_new && i / 8 < cmd.y_old) || (i / 8 < cmd.y_new && i / 8 > cmd.y_old)) {
+                    if (!board[i].isEmpty) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        if (!board[newIndex].isEmpty && board[newIndex].piece.team == board[oldIndex].piece.team) {
+            return false;
+        }
+
+        changes[-1].type = ChangeType::Delete;
+        changes[0].x = cmd.x_old;
+        changes[0].y = cmd.y_old;
+        changes[0].role = board[oldIndex].piece;
+
+        if (board[newIndex].isEmpty) {
+            changes[1].type = ChangeType::Add;
+            changes[1].x = cmd.x_new;
+            changes[1].y = cmd.y_new;
+            changes[1].role = board[oldIndex].piece;
+            changes[1].role.moveCount += 1;
+
+            changes[2].type = ChangeType::NoChange;
+        } else {
+            changes[1].type = ChangeType::Delete;
+            changes[1].x = cmd.x_new;
+            changes[1].y = cmd.y_new;
+            changes[1].role = board[newIndex].piece;
+
+            changes[2].type = ChangeType::Add;
+            changes[2].x = cmd.x_new;
+            changes[2].y = cmd.y_new;
+            changes[2].role = board[oldIndex].piece;
+            changes[2].role.moveCount += 1;
+
+            changes[3].type = ChangeType::NoChange;
+        }
+
         return true;
     }
 };
 
 class RookRule : public AbstractPieceRule {
    public:
-    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change* changes) const override {
+    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change changes[5]) const override {
+        int oldIndex = vec2toIndex(cmd.x_old, cmd.y_old);
+        int newIndex = vec2toIndex(cmd.x_new, cmd.y_new);
+        if (board[oldIndex].isEmpty) {
+            return false;
+        }
+
+        if (abs(cmd.x_old - cmd.x_new) * abs(cmd.y_old - cmd.y_new) != 0 ||
+            abs(cmd.x_old - cmd.x_new) + abs(cmd.y_old - cmd.y_new) == 0) {
+            return false;
+        }
+
+        for (int i = 0; i < 64; i++) {
+            if ((i % 8 > cmd.x_new && i % 8 < cmd.x_old) || (i % 8 < cmd.x_new && i % 8 > cmd.x_old)) {
+                if (!board[i].isEmpty) {
+                    return false;
+                }
+            }
+
+            if ((i / 8 > cmd.y_new && i / 8 < cmd.y_old) || (i / 8 < cmd.y_new && i / 8 > cmd.y_old)) {
+                if (!board[i].isEmpty) {
+                    return false;
+                }
+            }
+        }
+
+        if (!board[newIndex].isEmpty && board[newIndex].piece.team == board[oldIndex].piece.team) {
+            return false;
+        }
+
+        changes[-1].type = ChangeType::Delete;
+        changes[0].x = cmd.x_old;
+        changes[0].y = cmd.y_old;
+        changes[0].role = board[oldIndex].piece;
+
+        if (board[newIndex].isEmpty) {
+            changes[1].type = ChangeType::Add;
+            changes[1].x = cmd.x_new;
+            changes[1].y = cmd.y_new;
+            changes[1].role = board[oldIndex].piece;
+            changes[1].role.moveCount += 1;
+
+            changes[2].type = ChangeType::NoChange;
+        } else {
+            changes[1].type = ChangeType::Delete;
+            changes[1].x = cmd.x_new;
+            changes[1].y = cmd.y_new;
+            changes[1].role = board[newIndex].piece;
+
+            changes[2].type = ChangeType::Add;
+            changes[2].x = cmd.x_new;
+            changes[2].y = cmd.y_new;
+            changes[2].role = board[oldIndex].piece;
+            changes[2].role.moveCount += 1;
+
+            changes[3].type = ChangeType::NoChange;
+        }
         return true;
     }
 };
 
 class QueenRule : public AbstractPieceRule {
    public:
-    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change* changes) const override {
+    bool legalCmd(const BoardElem(board)[64], const Cmd& cmd, Change changes[5]) const override {
         RookRule rookrule;
         if (rookrule.legalCmd(board, cmd, changes)) return true;
 
@@ -337,6 +574,21 @@ bool drawState(BoardElem board[64], Team t) {
 }
 
 GameState::GameState() : round(1), isFinished(false), winner(Team::None), turn(Team::White) {
+    for (int i = 0; i < 64; i++) this->board[i].isEmpty = true;
+
+    for (int i = 0; i < 8; i++) {
+        this->board[i + 8].isEmpty = false;
+        this->board[i + 8].piece.moveCount = 0;
+        this->board[i + 8].piece.team = Team::White;
+        this->board[i + 8].piece.role = PieceRole::Pawn;
+    }
+
+    for (int i = 0; i < 8; i++) {
+        this->board[i + 48].isEmpty = false;
+        this->board[i + 48].piece.moveCount = 0;
+        this->board[i + 48].piece.team = Team::Black;
+        this->board[i + 48].piece.role = PieceRole::Pawn;
+    }
 }
 
 BoardElem* GameState::getPos(int x, int y) {
@@ -350,7 +602,7 @@ GameState GameState::clone() {
 void GameState::debug() {
     for (int i = 0; i < 64; i++) {
         if (!this->board[i].isEmpty) {
-            printf("x:%d y:%d %d\n", i % 8, i / 8, (int) this->board[i].piece.role);
+            printf("x:%d y:%d %d %d\n", i % 8, i / 8, (int) this->board[i].piece.role, (int) this->board[i].piece.team);
         }
     }
 }
@@ -380,6 +632,10 @@ Response GameState::execute(const std::string& cmdstr) {
     }
 
     PieceRole role = this->getRole(cmd.x_old, cmd.y_old);
+    if (role == PieceRole::None) {
+        return Response::ErrNoPieceThere;
+    }
+
     const AbstractPieceRule* rule = selectRule(role);
 
     Change changes[5];
@@ -387,16 +643,15 @@ Response GameState::execute(const std::string& cmdstr) {
         return Response::ErrPieceRule;
     }
 
-    // candidate state
+    // clone the state to check if the move make your king die
     GameState stateRc = this->clone();
     applyChange(stateRc.board, changes);
 
-    // no sucide
     if (kingDeadState(stateRc.board, this->turn)) {
         return Response::ErrSucide;
     }
 
-    // final
+    // all check over, to decide which state the game state will change
     applyChange(this->board, changes);
 
     if (kingDeadState(this->board, TeamReverse(this->turn))) {

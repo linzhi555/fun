@@ -9,6 +9,7 @@ namespace chess {
 enum class Response : char {
     Success,
     ErrParseCmd,
+    ErrNoPieceThere,
     ErrWrongPos,
     ErrAlreadyFinish,
     ErrNotYourTurn,
