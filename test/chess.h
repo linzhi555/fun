@@ -7,15 +7,25 @@
 namespace chess {
 
 enum class Response : char {
-    Success,
+    Success = 0,
     ErrParseCmd,
     ErrNoPieceThere,
     ErrWrongPos,
     ErrAlreadyFinish,
     ErrNotYourTurn,
     ErrPieceRule,
+    ErrPawnMove,
+    ErrKingMove,
+    ErrBishopMove,
+    ErrKnightMove,
+    ErrQueenMove,
+    ErrRookMove,
+    ErrBlocked,
+    ErrKillSame,
     ErrSucide,
 };
+
+const char* responseTostr(Response r);
 
 enum class Team : char {
     None,
@@ -57,6 +67,8 @@ class GameState {
     GameState();
     GameState clone();
     void debug();
+
+    void initPiece(int x, int y, PieceRole role, Team t);
     // std::string Save();
     // GameState Load(const std::string& data);
     Response execute(const std::string& cmd);
@@ -64,6 +76,7 @@ class GameState {
    private:
     BoardElem* getPos(int x, int y);
     PieceRole getRole(int x, int y);
+    Team getTeam(int x, int y);
 
     bool possibleMove(int x, int y);
     bool finishState();

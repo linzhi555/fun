@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(fun-editor VERSION 0.1 LANGUAGES C CXX)
 
+enable_testing()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
