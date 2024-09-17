@@ -1,0 +1,19 @@
+# vim: set foldmethod=marker:
+
+Intro {{{
+    This editor for  fun! So the editor is not intend to be pure editor.
+    This editor will have a lot game, music, and many othter extra function.
+}}}
+
+Roadmap{{{
+    be simple editor {{{
+        normal mode
+        vim move
+        cmd mode
+    }}}
+
+    - interpreter
+    - game when exectute the command
+    - music when execute the command
+    - plugin extension
+}}}
