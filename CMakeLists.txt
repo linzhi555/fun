@@ -21,8 +21,6 @@ endif()
 find_package(QT NAMES Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
-add_subdirectory(blah)
-add_subdirectory(objc)
 
 set( PROJECT_SOURCES
         ./src/version.cpp
@@ -35,6 +33,4 @@ set( PROJECT_SOURCES
 set(CMAKE_BUILD_TYPE Debug)
 message(${PROJECT_SOURCES})
 add_executable(fun ${PROJECT_SOURCES})
-target_link_libraries(fun PRIVATE Qt5::Widgets blah)
-target_include_directories(fun PRIVATE blah)
-add_subdirectory(test)
+target_link_libraries(fun PRIVATE Qt5::Widgets)
