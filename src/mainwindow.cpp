@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
       lineCountLabel(new QLabel(this)),
       fileSaveState(new QLabel(this)),
       currentFile("") {
+
     setCentralWidget(textEdit);
 
     // 设置状态栏
@@ -86,7 +87,7 @@ void MainWindow::saveFile() {
             file.write(textEdit->toPlainText().toUtf8());
             file.close();
             updateFileInfo(currentFile);
-            fileSaveState->setText("written");
+            fileSaveState->setText("已写入");
         }
     } else {
         this->fileSaveState->setText("no filename to write");

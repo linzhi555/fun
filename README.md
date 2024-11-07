@@ -4,11 +4,13 @@
 ps: this file is edited by fun editor.
 
 build 编译:
+
 ```
 cmake -B build
 cmake --build ./build
 ```
 run 运行:
+
 ```
 ./build/fun
 ```
